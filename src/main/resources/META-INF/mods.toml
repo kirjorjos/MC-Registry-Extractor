@@ -43,7 +43,7 @@ authors="kirjorjos" #optional
 # The description text for the mod (multi line!) (#mandatory)
 description='''
 This is a quick mod I threw together to extract the loaded registry in a pack to a JSON file
-Simply run /extract-registry <file path>
+Simply run /extract <file path>
 Spaces in the file path are supported and will be automatically merged
 '''
 # A dependency - use the . to indicate dependency for a specific modid. Dependencies are optional.
