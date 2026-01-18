@@ -2,6 +2,7 @@ package com.kirjorjos.mcregistryextractor;
 
 import net.minecraft.network.chat.Component;
 
+import com.google.gson.JsonObject;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 
@@ -18,10 +19,8 @@ public class ExtractCommand {
 									Commands.argument("args", StringArgumentType.greedyString())
 											.executes(context -> {
 													String args = StringArgumentType.getString(context, "args");
-
-													MCRegistryExtractor.getLogger().info(args);
-
-													return 1;
+													JsonObject items = ExtractItems.extractItems();
+													return JSONWriter.write(args, items);
 											})
 							)
 							.executes(context -> {
