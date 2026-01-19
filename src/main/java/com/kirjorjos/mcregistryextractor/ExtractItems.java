@@ -35,7 +35,7 @@ public class ExtractItems {
 					itemJson.addProperty("mod", capitalize(namespace));
 					itemJson.addProperty("block", item instanceof BlockItem bi ? ForgeRegistries.BLOCKS.getKey(bi.getBlock()).toString() : null);
 					itemJson.addProperty("maxSize", item.getMaxStackSize());
-					itemJson.addProperty("maxDamage", item.getMaxDamage());
+					itemJson.addProperty("maxDamage", item.isDamageable(stack) ? item.getMaxDamage() : -1);
 					itemJson.addProperty("isEnchantable", !stack.isEmpty() && stack.isEnchantable());
 					itemJson.addProperty("fuelBurnTime", ForgeHooks.getBurnTime(stack, null));
 					itemJson.addProperty("feContainer", stack.getCapability(CapabilityEnergy.ENERGY).isPresent());
