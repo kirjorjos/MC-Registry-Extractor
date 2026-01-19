@@ -2,6 +2,9 @@ package com.kirjorjos.mcregistryextractor;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -9,18 +12,27 @@ import com.google.gson.JsonObject;
 
 public class JSONWriter {
 
-	public static int write(String path, JsonObject json) {
+	public static String write(String path, JsonObject json) throws IOException {
 		
 		Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-		try (FileWriter writer = new FileWriter(path)) {
-				gson.toJson(json, writer);
-		} catch (IOException e) {
-			MCRegistryExtractor.getLogger().warn(e.getLocalizedMessage());
-			return 1;
+		if (path.startsWith("~")) {
+			path = System.getProperty("user.home") + path.substring(1);
+		}
+		Path resolved = Paths.get(path).normalize().toAbsolutePath();
+		if (Files.isDirectory(resolved)) {
+			resolved = resolved.resolve("registry.json");
 		}
 
-		return 0;
+		try (FileWriter writer = new FileWriter(resolved.toString())) {
+				gson.toJson(json, writer);
+		} catch (IOException e) {
+			MCRegistryExtractor.getLogger().info(path);
+			MCRegistryExtractor.getLogger().warn(e.getLocalizedMessage());
+			throw e;
+		}
+
+		return resolved.toString();
 	}
 
 }

@@ -19,6 +19,7 @@ public class ExtractItems {
 			JsonObject namespaces = new JsonObject();
 
 			for (Item item : ForgeRegistries.ITEMS) {
+					@SuppressWarnings("null")
 					ItemStack stack = new ItemStack(item);
 					ResourceLocation id = ForgeRegistries.ITEMS.getKey(item);
 
