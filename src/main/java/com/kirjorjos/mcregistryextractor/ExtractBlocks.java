@@ -5,9 +5,11 @@ import com.google.gson.JsonObject;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.EntityBlock;
@@ -21,7 +23,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 public class ExtractBlocks {
 	
 	@SuppressWarnings("null")
-	public static JsonObject extractBlocks() {
+	public static JsonObject extractBlocks(ServerPlayer player) {
     JsonObject root = new JsonObject();
     JsonObject blocksRoot = new JsonObject();
     root.add("blocks", blocksRoot);
@@ -55,10 +57,10 @@ public class ExtractBlocks {
 
 			// opaque
 			blockJson.addProperty("opaque",
-							block.defaultBlockState().isSolidRender(null, BlockPos.ZERO));
+							block.defaultBlockState().isSolidRender(player.level, BlockPos.ZERO));
 
 			// shearable
-			blockJson.addProperty("shearable", ( (IForgeShearable) block).isShearable(ItemStack.EMPTY, null, null));
+			blockJson.addProperty("shearable", ( block instanceof IForgeShearable) ? ((IForgeShearable) block).isShearable(ItemStack.EMPTY, null, null) : false);
 
 			// sounds
 			SoundType sound = block.defaultBlockState().getSoundType();

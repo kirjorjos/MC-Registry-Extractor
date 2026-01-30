@@ -33,7 +33,7 @@ public class ExtractCommand {
 												root.add("metadata", metadata);
 												String args = StringArgumentType.getString(context, "args");
 												root.add("items", ExtractItems.extractItems());
-												root.add("blocks", ExtractBlocks.extractBlocks());
+												root.add("blocks", ExtractBlocks.extractBlocks(context.getSource().getPlayerOrException()));
 												root.add("fluids", ExtractFluids.extractFluids());
 												root.add("entities", ExtractEntities.extractEntities());
 												try {

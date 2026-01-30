@@ -45,7 +45,7 @@ public class ExtractItems {
 
 					// tooltips
 					JsonArray tooltipArray = new JsonArray();
-					for (var component : stack.getTooltipLines(null, TooltipFlag.Default.NORMAL)) {
+					for (var component : stack.getTooltipLines(null, TooltipFlag.Default.ADVANCED)) {
 							tooltipArray.add(component.getString());
 					}
 					itemJson.add("tooltip", tooltipArray);
