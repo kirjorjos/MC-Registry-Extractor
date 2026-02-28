@@ -12,9 +12,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 public class ExtractEntities {
 	public static JsonObject extractEntities() {
-    JsonObject root = new JsonObject();
-    JsonObject entitiesRoot = new JsonObject();
-    root.add("entities", entitiesRoot);
+    JsonObject entities = new JsonObject();
 
     for (EntityType<?> type : ForgeRegistries.ENTITY_TYPES) {
 			ResourceLocation id = ForgeRegistries.ENTITY_TYPES.getKey(type);
@@ -23,8 +21,8 @@ public class ExtractEntities {
 			String namespace = id.getNamespace();
 			String path = id.getPath();
 
-			JsonObject namespaceObj = entitiesRoot.has(namespace)
-							? entitiesRoot.getAsJsonObject(namespace)
+			JsonObject namespaceObj = entities.has(namespace)
+							? entities.getAsJsonObject(namespace)
 							: new JsonObject();
 
 			JsonObject entityJson = new JsonObject();
@@ -74,10 +72,10 @@ public class ExtractEntities {
 
 			// Add to namespace
 			namespaceObj.add(path, entityJson);
-			entitiesRoot.add(namespace, namespaceObj);
+			entities.add(namespace, namespaceObj);
     }
 
-    return root;
+    return entities;
 	}
 
 }

@@ -15,8 +15,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 public class ExtractItems {
 	public static JsonObject extractItems() {
-			JsonObject root = new JsonObject();
-			JsonObject namespaces = new JsonObject();
+			JsonObject items = new JsonObject();
 
 			for (Item item : ForgeRegistries.ITEMS) {
 					@SuppressWarnings("null")
@@ -27,8 +26,8 @@ public class ExtractItems {
 					String path = id.getPath();
 
 					// create namespace object if needed
-					namespaces.add(namespace, namespaces.has(namespace) ? namespaces.get(namespace).getAsJsonObject() : new JsonObject());
-					JsonObject nsObj = namespaces.get(namespace).getAsJsonObject();
+					items.add(namespace, items.has(namespace) ? items.get(namespace).getAsJsonObject() : new JsonObject());
+					JsonObject nsObj = items.get(namespace).getAsJsonObject();
 
 					JsonObject itemJson = new JsonObject();
 					itemJson.addProperty("name", stack.getHoverName().getString());
@@ -61,8 +60,7 @@ public class ExtractItems {
 					nsObj.add(path, itemJson);
 			}
 
-			root.add("items", namespaces);
-			return root;
+			return items;
 	}
 
 	private static String capitalize(String s) {

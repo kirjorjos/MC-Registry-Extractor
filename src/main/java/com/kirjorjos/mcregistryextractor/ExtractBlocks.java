@@ -9,7 +9,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.EntityBlock;
@@ -24,9 +23,7 @@ public class ExtractBlocks {
 	
 	@SuppressWarnings("null")
 	public static JsonObject extractBlocks(ServerPlayer player) {
-    JsonObject root = new JsonObject();
-    JsonObject blocksRoot = new JsonObject();
-    root.add("blocks", blocksRoot);
+    JsonObject blocks = new JsonObject();
 
     for (Block block : ForgeRegistries.BLOCKS) {
 			ResourceLocation id = ForgeRegistries.BLOCKS.getKey(block);
@@ -35,8 +32,8 @@ public class ExtractBlocks {
 			String namespace = id.getNamespace();
 			String path = id.getPath();
 
-			JsonObject namespaceObj = blocksRoot.has(namespace)
-							? blocksRoot.getAsJsonObject(namespace)
+			JsonObject namespaceObj = blocks.has(namespace)
+							? blocks.getAsJsonObject(namespace)
 							: new JsonObject();
 
 			JsonObject blockJson = new JsonObject();
@@ -109,10 +106,10 @@ public class ExtractBlocks {
 			blockJson.add("tags", tags);
 
 			namespaceObj.add(path, blockJson);
-			blocksRoot.add(namespace, namespaceObj);
+			blocks.add(namespace, namespaceObj);
     }
 
-    return root;
+    return blocks;
 	}
 
 }

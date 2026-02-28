@@ -22,9 +22,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 public class ExtractFluids {
 	@SuppressWarnings("null")
 	public static JsonObject extractFluids() {
-    JsonObject root = new JsonObject();
-    JsonObject fluidsRoot = new JsonObject();
-    root.add("fluids", fluidsRoot);
+    JsonObject fluids = new JsonObject();
 
     for (Fluid fluid : ForgeRegistries.FLUIDS) {
 			ResourceLocation id = ForgeRegistries.FLUIDS.getKey(fluid);
@@ -39,8 +37,8 @@ public class ExtractFluids {
 			String namespace = id.getNamespace();
 			String path = id.getPath();
 
-			JsonObject namespaceObj = fluidsRoot.has(namespace)
-							? fluidsRoot.getAsJsonObject(namespace)
+			JsonObject namespaceObj = fluids.has(namespace)
+							? fluids.getAsJsonObject(namespace)
 							: new JsonObject();
 
 			FluidType type = fluid.getFluidType();
@@ -93,10 +91,10 @@ public class ExtractFluids {
 			fluidJson.add("tags", tags);
 
 			namespaceObj.add(path, fluidJson);
-			fluidsRoot.add(namespace, namespaceObj);
+			fluids.add(namespace, namespaceObj);
     }
 
-    return root;
+    return fluids;
 	}
 
 	private static String soundId(@Nullable SoundEvent sound) {
