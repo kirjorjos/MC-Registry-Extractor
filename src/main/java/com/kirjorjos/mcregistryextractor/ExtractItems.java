@@ -5,11 +5,16 @@ import com.google.gson.JsonObject;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.BucketItem;
+import net.minecraft.world.item.DiggerItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TieredItem;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.energy.CapabilityEnergy;
+import net.minecraftforge.fml.ModContainer;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.registries.ForgeRegistries;
 
@@ -31,16 +36,43 @@ public class ExtractItems {
 
 					JsonObject itemJson = new JsonObject();
 					itemJson.addProperty("name", stack.getHoverName().getString());
-					itemJson.addProperty("mod", capitalize(namespace));
+					
+					ModContainer mod = ModList.get().getModContainerById(namespace).orElse(null);
+					itemJson.addProperty("mod", mod != null ? mod.getModInfo().getDisplayName() : namespace);
+					
 					itemJson.addProperty("block", item instanceof BlockItem bi ? ForgeRegistries.BLOCKS.getKey(bi.getBlock()).toString() : null);
 					itemJson.addProperty("maxSize", item.getMaxStackSize());
 					itemJson.addProperty("maxDamage", item.isDamageable(stack) ? item.getMaxDamage() : -1);
 					itemJson.addProperty("isEnchantable", !stack.isEmpty() && stack.isEnchantable());
 					itemJson.addProperty("fuelBurnTime", ForgeHooks.getBurnTime(stack, null));
 					itemJson.addProperty("feContainer", stack.getCapability(CapabilityEnergy.ENERGY).isPresent());
-					itemJson.addProperty("isFluidContainer", false); // placeholder
-					itemJson.addProperty("fluidCapacity", 0);
-					itemJson.addProperty("inventorySize", stack.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).isPresent() ? 1 : 0);
+					
+					if (item instanceof BucketItem bucket) {
+						itemJson.addProperty("isFluidContainer", true);
+						itemJson.addProperty("fluid", ForgeRegistries.FLUIDS.getKey(bucket.getFluid()).toString());
+						itemJson.addProperty("fluidCapacity", 1000);
+					} else {
+						itemJson.addProperty("isFluidContainer", false);
+						itemJson.addProperty("fluidCapacity", 0);
+					}
+
+					int invSize = 0;
+					var handlerCap = stack.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY);
+					if (handlerCap.isPresent()) {
+						invSize = handlerCap.orElse(null).getSlots();
+					}
+					itemJson.addProperty("inventorySize", invSize);
+
+					int toolTier = 0;
+					float efficiency = 1.0f;
+					if (item instanceof TieredItem tiered) {
+						toolTier = tiered.getTier().getLevel();
+					}
+					if (item instanceof DiggerItem digger) {
+						efficiency = digger.getTier().getSpeed();
+					}
+					itemJson.addProperty("toolTier", toolTier);
+					itemJson.addProperty("efficiency", efficiency);
 
 					// tooltips
 					JsonArray tooltipArray = new JsonArray();
@@ -61,11 +93,6 @@ public class ExtractItems {
 			}
 
 			return items;
-	}
-
-	private static String capitalize(String s) {
-		if (s == null || s.isEmpty()) return s;
-		return Character.toUpperCase(s.charAt(0)) + s.substring(1);
 	}
 
 }

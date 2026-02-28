@@ -93,16 +93,27 @@ public class ExtractBlocks {
 			energy.addProperty("stored", 0);
 			blockJson.add("energy", energy);
 
+			// destroy speed
+			blockJson.addProperty("destroySpeed", block.defaultBlockState().getDestroySpeed(player.level, BlockPos.ZERO));
+
 			// inventory
 			blockJson.add("inventory", new JsonArray());
 
 			// tags
 			JsonArray tags = new JsonArray();
-			block.builtInRegistryHolder().tags()
-				.forEach(tag -> {
-						String tagName = tag.location().toString();
-						tags.add(tagName);
-				});
+			int requiredTier = 0;
+			var holder = block.builtInRegistryHolder();
+			
+			// We iterate tags twice or just use a helper
+			for (var tag : holder.tags().toList()) {
+				String tagName = tag.location().toString();
+				tags.add(tagName);
+				if (tagName.equals("minecraft:needs_stone_tool")) requiredTier = Math.max(requiredTier, 1);
+				if (tagName.equals("minecraft:needs_iron_tool")) requiredTier = Math.max(requiredTier, 2);
+				if (tagName.equals("minecraft:needs_diamond_tool")) requiredTier = Math.max(requiredTier, 3);
+				if (tagName.equals("minecraft:needs_netherite_tool")) requiredTier = Math.max(requiredTier, 4);
+			}
+			blockJson.addProperty("requiredTier", requiredTier);
 			blockJson.add("tags", tags);
 
 			namespaceObj.add(path, blockJson);
