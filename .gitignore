@@ -23,6 +23,7 @@ build
 # other
 eclipse
 run
+runExtractor.sh
 
 # Files from Forge MDK
 forge*changelog.txt

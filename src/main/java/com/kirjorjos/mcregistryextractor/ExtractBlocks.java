@@ -5,7 +5,7 @@ import com.google.gson.JsonObject;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -22,7 +22,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 public class ExtractBlocks {
 	
 	@SuppressWarnings("null")
-	public static JsonObject extractBlocks(ServerPlayer player) {
+	public static JsonObject extractBlocks(Entity player) {
     JsonObject blocks = new JsonObject();
 
     for (Block block : ForgeRegistries.BLOCKS) {
@@ -48,9 +48,7 @@ public class ExtractBlocks {
 
 			// item
 			Item item = block.asItem();
-			blockJson.addProperty("item",
-							item == Items.AIR ? null :
-											ForgeRegistries.ITEMS.getKey(item).toString());
+			blockJson.addProperty("item", ForgeRegistries.ITEMS.getKey(item).toString());
 
 			// opaque
 			blockJson.addProperty("opaque",
@@ -67,12 +65,14 @@ public class ExtractBlocks {
 			sounds.addProperty("step", sound.getStepSound().getLocation().toString());
 			blockJson.add("sounds", sounds);
 
-			// plant age (max)
-			int plantAge = -1;
+			// plant age
+			int maxPlantAge = -1;
 			if (block instanceof CropBlock crop) {
-					plantAge = crop.getMaxAge();
+					maxPlantAge = crop.getMaxAge();
 			}
-			blockJson.addProperty("plantAge", plantAge);
+			blockJson.addProperty("plantAge", 0);
+			blockJson.addProperty("age", 0);
+			blockJson.addProperty("maxPlantAge", maxPlantAge);
 
 			// fluid
 			FluidState fluidState = block.defaultBlockState().getFluidState();

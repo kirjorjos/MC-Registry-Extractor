@@ -33,9 +33,9 @@ public class ExtractCommand {
 												root.add("metadata", metadata);
 												String args = StringArgumentType.getString(context, "args");
 												root.add("items", ExtractItems.extractItems());
-												root.add("blocks", ExtractBlocks.extractBlocks(context.getSource().getPlayerOrException()));
+												root.add("blocks", ExtractBlocks.extractBlocks(context.getSource().getEntityOrException()));
 												root.add("fluids", ExtractFluids.extractFluids());
-												root.add("entities", ExtractEntities.extractEntities());
+												root.add("entities", ExtractEntities.extractEntities(context.getSource().getEntityOrException()));
 												try {
 													String path = JSONWriter.write(args, root);
 													context.getSource().sendSuccess(

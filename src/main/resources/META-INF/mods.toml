@@ -47,7 +47,7 @@ Simply run /extract <file path>
 Spaces in the file path are supported and will be automatically merged
 '''
 # A dependency - use the . to indicate dependency for a specific modid. Dependencies are optional.
-[[dependencies.examplemod]] #optional
+[[dependencies.mc_registry_extractor]] #optional
     # the modid of the dependency
     modId="forge" #mandatory
     # Does this dependency have to exist - if not, ordering below must be specified

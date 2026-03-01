@@ -57,6 +57,7 @@ public class ExtractFluids {
 			fluidJson.addProperty("block",
 							block == Blocks.AIR ? null :
 											ForgeRegistries.BLOCKS.getKey(block).toString());
+			fluidJson.addProperty("lightLevel", block.defaultBlockState().getLightEmission());
 
 			// Physical properties
 			fluidJson.addProperty("density", type.getDensity());
