@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.DiggerItem;
@@ -12,6 +13,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TieredItem;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraftforge.common.ForgeHooks;
+import net.minecraftforge.common.IPlantable;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
@@ -19,7 +21,7 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.registries.ForgeRegistries;
 
 public class ExtractItems {
-	public static JsonObject extractItems() {
+	public static JsonObject extractItems(Entity player) {
 			JsonObject items = new JsonObject();
 
 			for (Item item : ForgeRegistries.ITEMS) {
@@ -37,15 +39,20 @@ public class ExtractItems {
 					JsonObject itemJson = new JsonObject();
 					itemJson.addProperty("name", stack.getHoverName().getString());
 					
-					ModContainer mod = ModList.get().getModContainerById(namespace).orElse(null);
-					itemJson.addProperty("mod", mod != null ? mod.getModInfo().getDisplayName() : namespace);
+					String modName = ModList.get().getModContainerById(namespace)
+							.map(c -> c.getModInfo().getDisplayName())
+							.orElse(namespace);
+					itemJson.addProperty("mod", modName);
 					
 					itemJson.addProperty("block", item instanceof BlockItem bi ? ForgeRegistries.BLOCKS.getKey(bi.getBlock()).toString() : null);
 					itemJson.addProperty("maxSize", item.getMaxStackSize());
 					itemJson.addProperty("maxDamage", item.isDamageable(stack) ? item.getMaxDamage() : -1);
 					itemJson.addProperty("isEnchantable", !stack.isEmpty() && stack.isEnchantable());
 					itemJson.addProperty("fuelBurnTime", ForgeHooks.getBurnTime(stack, null));
-					itemJson.addProperty("feContainer", stack.getCapability(CapabilityEnergy.ENERGY).isPresent());
+					
+					var energyCap = stack.getCapability(CapabilityEnergy.ENERGY);
+					itemJson.addProperty("feContainer", energyCap.isPresent());
+					itemJson.addProperty("feCapacity", energyCap.map(e -> e.getMaxEnergyStored()).orElse(0));
 					
 					if (item instanceof BucketItem bucket) {
 						itemJson.addProperty("isFluidContainer", true);
@@ -74,9 +81,25 @@ public class ExtractItems {
 					itemJson.addProperty("toolTier", toolTier);
 					itemJson.addProperty("efficiency", efficiency);
 
+					// plantable
+					boolean isPlantable = item instanceof IPlantable;
+					if (!isPlantable && item instanceof BlockItem bi) {
+						isPlantable = bi.getBlock() instanceof IPlantable;
+					}
+					itemJson.addProperty("isPlantable", isPlantable);
+					String plantType = "none";
+					String plant = "";
+					if (isPlantable) {
+						IPlantable plantable = (item instanceof IPlantable) ? (IPlantable) item : (IPlantable) ((BlockItem) item).getBlock();
+						plantType = plantable.getPlantType(player.level, player.blockPosition()).getName();
+						plant = ForgeRegistries.BLOCKS.getKey(plantable.getPlant(player.level, player.blockPosition()).getBlock()).toString();
+					}
+					itemJson.addProperty("plantType", plantType);
+					itemJson.addProperty("plant", plant);
+
 					// tooltips
 					JsonArray tooltipArray = new JsonArray();
-					for (var component : stack.getTooltipLines(null, TooltipFlag.Default.ADVANCED)) {
+					for (var component : stack.getTooltipLines(null, TooltipFlag.Default.NORMAL)) {
 							tooltipArray.add(component.getString());
 					}
 					itemJson.add("tooltip", tooltipArray);

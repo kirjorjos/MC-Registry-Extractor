@@ -157,13 +157,13 @@ public class MCRegistryExtractor
                     metadata.addProperty("description", "Auto-generated game registries");
                     root.add("metadata", metadata);
 
-                    root.add("items", ExtractItems.extractItems());
+                    root.add("items", ExtractItems.extractItems(mc.player));
                     root.add("blocks", ExtractBlocks.extractBlocks(mc.player));
                     root.add("fluids", ExtractFluids.extractFluids());
                     root.add("entities", ExtractEntities.extractEntities(mc.player));
 
                     String home = System.getProperty("user.home");
-                    String path = home + "/registry_output.ts";
+                    String path = home + "/registry_output.json";
                     JSONWriter.write(path, root);
                     LOGGER.info("DevHandler: Successfully extracted to " + path);
                     

@@ -40,15 +40,19 @@ public class ExtractEntities {
 
 			// Basic info
 			entityJson.addProperty("name", type.getDescription().getString());
-			ModContainer mod = ModList.get().getModContainerById(namespace).orElse(null);
-			entityJson.addProperty("mod", mod != null ? mod.getModInfo().getDisplayName() : namespace);
+			entityJson.addProperty("displayName", type.getDescription().getString());
+			String modName = ModList.get().getModContainerById(namespace)
+					.map(c -> c.getModInfo().getDisplayName())
+					.orElse(namespace);
+			entityJson.addProperty("mod", modName);
+			entityJson.addProperty("modName", modName);
 
 			// Class traits
 			MobCategory category = type.getCategory();
 			// Integrated Dynamics: IsMob is typically Monsters only.
-			entityJson.addProperty("isMob", category.equals(MobCategory.MONSTER));
-			entityJson.addProperty("isAnimal", category.equals(MobCategory.CREATURE) || category.equals(MobCategory.WATER_CREATURE));
-			entityJson.addProperty("isPlayer", type.equals(EntityType.PLAYER));
+			entityJson.addProperty("mob", category.equals(MobCategory.MONSTER));
+			entityJson.addProperty("animal", category.equals(MobCategory.CREATURE) || category.equals(MobCategory.WATER_CREATURE));
+			entityJson.addProperty("player", type.equals(EntityType.PLAYER));
 			entityJson.addProperty("minecart", id.toString().contains("minecart"));
 			entityJson.addProperty("isItem", type.equals(EntityType.ITEM));
 
@@ -58,8 +62,7 @@ public class ExtractEntities {
 
 			// Instance-level defaults
 			double health = 0;
-			boolean isShearable = false;
-			boolean canBreed = false;
+			boolean shearable = false;
 			JsonArray breedableList = new JsonArray();
 			String hurtSound = "";
 			String deathSound = "";
@@ -131,10 +134,9 @@ public class ExtractEntities {
 						}
 					}
 					if (entity instanceof IForgeShearable) {
-						isShearable = true;
+						shearable = true;
 					}
 					if (entity instanceof Animal animal) {
-						canBreed = true;
 						for (Item item : ForgeRegistries.ITEMS) {
 							if (animal.isFood(new ItemStack(item))) {
 								breedableList.add(ForgeRegistries.ITEMS.getKey(item).toString());
@@ -146,28 +148,29 @@ public class ExtractEntities {
 				}
 			} catch (Exception e) {
 				// Fallback to simple logic or defaults
-				if (category.equals(MobCategory.CREATURE)) canBreed = true;
 			}
 
 			entityJson.addProperty("health", health);
-			entityJson.addProperty("isBurning", false);
-			entityJson.addProperty("isWet", false);
-			entityJson.addProperty("isCrouching", false);
-			entityJson.addProperty("isEating", false);
+			entityJson.addProperty("burning", false);
+			entityJson.addProperty("wet", false);
+			entityJson.addProperty("crouching", false);
+			entityJson.addProperty("eating", false);
 			entityJson.addProperty("age", 0);
-			entityJson.addProperty("isChild", false);
-			entityJson.addProperty("canBreed", canBreed);
-			entityJson.addProperty("isInLove", false);
-			entityJson.addProperty("isShearable", isShearable);
+			entityJson.addProperty("breedingAge", 0);
+			entityJson.addProperty("child", false);
+			entityJson.addProperty("inLove", false);
+			entityJson.addProperty("shearable", shearable);
+			entityJson.addProperty("isSheared", false);
 			entityJson.add("breedableList", breedableList);
 			
 			// If NBT is empty, don't even add it or add null so Properties.wrapValue handles it as iNull
-			entityJson.add("nbt", null);
+			entityJson.add("NBT", null);
 
 			entityJson.add("inventory", new JsonArray());
 			entityJson.add("armorInventory", new JsonArray());
 			entityJson.add("fluids", new JsonArray());
 			entityJson.addProperty("entityType", id.toString());
+			entityJson.addProperty("id", id.toString());
 			
 			JsonArray tagsArray = new JsonArray();
 			type.builtInRegistryHolder().tags()
@@ -181,6 +184,8 @@ public class ExtractEntities {
 			sounds.addProperty("hurt", hurtSound);
 			sounds.addProperty("death", deathSound);
 			entityJson.add("sounds", sounds);
+			entityJson.addProperty("hurtSound", hurtSound);
+			entityJson.addProperty("deathSound", deathSound);
 
 			// Add to namespace
 			namespaceObj.add(path, entityJson);

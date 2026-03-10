@@ -32,7 +32,7 @@ public class ExtractCommand {
 												// Add the metadata object to the root
 												root.add("metadata", metadata);
 												String args = StringArgumentType.getString(context, "args");
-												root.add("items", ExtractItems.extractItems());
+												root.add("items", ExtractItems.extractItems(context.getSource().getEntityOrException()));
 												root.add("blocks", ExtractBlocks.extractBlocks(context.getSource().getEntityOrException()));
 												root.add("fluids", ExtractFluids.extractFluids());
 												root.add("entities", ExtractEntities.extractEntities(context.getSource().getEntityOrException()));

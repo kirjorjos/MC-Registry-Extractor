@@ -13,15 +13,17 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraftforge.common.IForgeShearable;
+import net.minecraftforge.common.IPlantable;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.registries.ForgeRegistries;
 
 public class ExtractBlocks {
 	
-	@SuppressWarnings("null")
+	@SuppressWarnings({ "null", "unchecked", "rawtypes" })
 	public static JsonObject extractBlocks(Entity player) {
     JsonObject blocks = new JsonObject();
 
@@ -55,7 +57,7 @@ public class ExtractBlocks {
 							block.defaultBlockState().isSolidRender(player.level, BlockPos.ZERO));
 
 			// shearable
-			blockJson.addProperty("shearable", ( block instanceof IForgeShearable) ? ((IForgeShearable) block).isShearable(ItemStack.EMPTY, null, null) : false);
+			blockJson.addProperty("shearable", ( block instanceof IForgeShearable) ? ((IForgeShearable) block).isShearable(ItemStack.EMPTY, player.level, player.blockPosition()) : false);
 
 			// sounds
 			SoundType sound = block.defaultBlockState().getSoundType();
@@ -65,6 +67,19 @@ public class ExtractBlocks {
 			sounds.addProperty("step", sound.getStepSound().getLocation().toString());
 			blockJson.add("sounds", sounds);
 
+			// plantable
+			boolean isPlantable = block instanceof IPlantable;
+			blockJson.addProperty("isPlantable", isPlantable);
+			String plantType = "none";
+			String plant = "";
+			if (isPlantable) {
+				IPlantable plantable = (IPlantable) block;
+				plantType = plantable.getPlantType(player.level, player.blockPosition()).getName();
+				plant = ForgeRegistries.BLOCKS.getKey(plantable.getPlant(player.level, player.blockPosition()).getBlock()).toString();
+			}
+			blockJson.addProperty("plantType", plantType);
+			blockJson.addProperty("plant", plant);
+
 			// plant age
 			int maxPlantAge = -1;
 			if (block instanceof CropBlock crop) {
@@ -73,6 +88,17 @@ public class ExtractBlocks {
 			blockJson.addProperty("plantAge", 0);
 			blockJson.addProperty("age", 0);
 			blockJson.addProperty("maxPlantAge", maxPlantAge);
+
+			// possible properties
+			JsonObject possibleProperties = new JsonObject();
+			for (Property<?> property : block.defaultBlockState().getProperties()) {
+				JsonArray values = new JsonArray();
+				for (Object value : property.getPossibleValues()) {
+					values.add(((Property)property).getName((Comparable)value));
+				}
+				possibleProperties.add(property.getName(), values);
+			}
+			blockJson.add("possibleProperties", possibleProperties);
 
 			// fluid
 			FluidState fluidState = block.defaultBlockState().getFluidState();
